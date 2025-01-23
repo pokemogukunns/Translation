@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<!-- Created with https://packager.turbowarp.org/ -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- We only include this to explicitly loosen the CSP of various packager environments. It does not provide any security. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: blob:">
+  <title>日本語から翻訳</title>
+  <style>
+    body {
+      color: #ffffff;
+      font-family: sans-serif;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+    :root, body.is-fullscreen {
+      background-color: #000000;
+    }
+    [hidden] {
+      display: none !important;
+    }
+    h1 {
+      font-weight: normal;
+    }
+    a {
+      color: inherit;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    #app, #loading, #error, #launch {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: default;
+      user-select: none;
+      -webkit-user-select: none;
+      background-color: #000000;
+    }
+    #launch {
+      background-color: rgba(0, 0, 0, 0.7);
+      cursor: pointer;
+    }
+    .green-flag {
+      width: 80px;
+      height: 80px;
+      padding: 16px;
+      border-radius: 100%;
+      background: rgba(255, 255, 255, 0.75);
+      border: 3px solid hsla(0, 100%, 100%, 1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+    }
+    #loading {
+      
+    }
+    .progress-bar-outer {
+      border: 1px solid currentColor;
+      height: 10px;
+      width: 200px;
+      max-width: 200px;
+    }
+    .progress-bar-inner {
+      height: 100%;
+      width: 0;
+      background-color: currentColor;
+    }
+    .loading-text, noscript {
+      font-weight: normal;
+      font-size: 36px;
+      margin: 0 0 16px;
+    }
+    .loading-image {
+      margin: 0 0 16px;
+    }
+    #error-message, #error-stack {
+      font-family: monospace;
+      max-width: 600px;
+      white-space: pre-wrap;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    #error-stack {
+      text-align: left;
+      max-height: 200px;
+      overflow: auto;
+    }
+    .control-button {
+      width: 2rem;
+      height: 2rem;
+      padding: 0.375rem;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: pointer;
+      border: 0;
+      border-radius: 4px;
+    }
+    .control-button-highlight:hover {
+      background: #ff4c4c26;
+    }
+    .control-button-highlight.active {
+      background: #ff4c4c59;
+    }
+    .fullscreen-button {
+      background: white;
+    }
+    .standalone-fullscreen-button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 0 0 0 4px;
+      padding: 4px;
+      cursor: pointer;
+    }
+    .sc-canvas {
+      cursor: auto;
+    }
+    .sc-monitor-root[data-opcode^="data_"] .sc-monitor-value-color {
+      background-color: #ff8c1a;
+    }
+    .sc-monitor-row-value-outer {
+      background-color: #fc662c;
+    }
+    .sc-monitor-row-value-editing .sc-monitor-row-value-outer {
+      background-color: #e25b27;
+    }
+    
+  </style>
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="data:image/png;base64,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">
+</head>
+<body>
+  <div id="app"></div>
+
+  <div id="launch" class="screen" hidden title="Click to start">
+    <div class="green-flag">
+      <svg viewBox="0 0 16.63 17.5" width="42" height="44">
+        <defs><style>.cls-1,.cls-2{fill:#4cbf56;stroke:#45993d;stroke-linecap:round;stroke-linejoin:round;}.cls-2{stroke-width:1.5px;}</style></defs>
+        <path class="cls-1" d="M.75,2A6.44,6.44,0,0,1,8.44,2h0a6.44,6.44,0,0,0,7.69,0V12.4a6.44,6.44,0,0,1-7.69,0h0a6.44,6.44,0,0,0-7.69,0"/>
+        <line class="cls-2" x1="0.75" y1="16.75" x2="0.75" y2="0.75"/>
+      </svg>
+    </div>
+  </div>
+
+  <div id="loading" class="screen">
+    <noscript>Enable JavaScript</noscript>
+    <h1 class="loading-text">翻訳を起動しています…</h1>
+    <div class="loading-image"><img src="data:image/png;base64,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"></div>
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="loading-inner"></div></div>
+  </div>
+
+  <div id="error" class="screen" hidden>
+    <h1>Error</h1>
+    <details>
+      <summary id="error-message"></summary>
+      <p id="error-stack"></p>
+    </details>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    const appElement = document.getElementById('app');
+    const launchScreen = document.getElementById('launch');
+    const loadingScreen = document.getElementById('loading');
+    const loadingInner = document.getElementById('loading-inner');
+    const errorScreen = document.getElementById('error');
+    const errorScreenMessage = document.getElementById('error-message');
+    const errorScreenStack = document.getElementById('error-stack');
+
+    const handleError = (error) => {
+      console.error(error);
+      if (!errorScreen.hidden) return;
+      errorScreen.hidden = false;
+      errorScreenMessage.textContent = '' + error;
+      let debug = error && error.stack || 'no stack';
+      debug += '\nUser agent: ' + navigator.userAgent;
+      errorScreenStack.textContent = debug;
+    };
+    const setProgress = (progress) => {
+      if (loadingInner) loadingInner.style.width = progress * 100 + '%';
+    };
+    const interpolate = (a, b, t) => a + t * (b - a);
+
+    try {
+      setProgress(0.1);
+
+      const scaffolding = new Scaffolding.Scaffolding();
+      scaffolding.width = 480;
+      scaffolding.height = 360;
+      scaffolding.resizeMode = "preserve-ratio";
+      scaffolding.editableLists = false;
+      scaffolding.usePackagedRuntime = true;
+      scaffolding.setup();
+      scaffolding.appendTo(appElement);
+
+      const vm = scaffolding.vm;
+      window.scaffolding = scaffolding;
+      window.vm = scaffolding.vm;
+      window.Scratch = {
+        vm,
+        renderer: vm.renderer,
+        audioEngine: vm.runtime.audioEngine,
+        bitmapAdapter: vm.runtime.v2BitmapAdapter,
+        videoProvider: vm.runtime.ioDevices.video.provider
+      };
+
+      scaffolding.setUsername("player####".replace(/#/g, () => Math.floor(Math.random() * 10)));
+      scaffolding.setAccentColor("#ff4c4c");
+
+      try {
+        scaffolding.addCloudProvider(new Scaffolding.Cloud.WebSocketProvider(["wss://clouddata.turbowarp.org","wss://clouddata.turbowarp.xyz"], "p4-@日本語から翻訳.sb3"));
+      } catch (error) {
+        console.error(error);
+      }
+
+      vm.setTurboMode(false);
+      if (vm.setInterpolation) vm.setInterpolation(false);
+      if (vm.setFramerate) vm.setFramerate(30);
+      if (vm.renderer.setUseHighQualityRender) vm.renderer.setUseHighQualityRender(false);
+      if (vm.setRuntimeOptions) vm.setRuntimeOptions({
+        fencing: true,
+        miscLimits: true,
+        maxClones: 300,
+      });
+      if (vm.setCompilerOptions) vm.setCompilerOptions({
+        enabled: true,
+        warpTimer: false
+      });
+      if (vm.renderer.setMaxTextureDimension) vm.renderer.setMaxTextureDimension(2048);
+
+      // enforcePrivacy threat model only makes sense in the editor
+      if (vm.runtime.setEnforcePrivacy) vm.runtime.setEnforcePrivacy(false);
+
+      if (typeof ScaffoldingAddons !== 'undefined') {
+        ScaffoldingAddons.run(scaffolding, {"gamepad":false,"pointerlock":false,"specialCloudBehaviors":false,"unsafeCloudBehaviors":false,"pause":false});
+      }
+
+      scaffolding.setExtensionSecurityManager({
+        getSandboxMode: () => 'unsandboxed',
+        canLoadExtensionFromProject: () => true
+      });
+      for (const extension of ["data:text/javascript;,(function(Scratch)%20%7B%20%2F%2F%20Name%3A%20Iframe%0A%2F%2F%20ID%3A%20iframe%0A%2F%2F%20Description%3A%20Display%20webpages%20or%20HTML%20over%20the%20stage.%0A%2F%2F%20Context%3A%20%22iframe%22%20is%20an%20HTML%20element%20that%20lets%20websites%20embed%20other%20websites.%0A%2F%2F%20License%3A%20MIT%20AND%20MPL-2.0%0A%0A%2F*%20generated%20l10n%20code%20*%2FScratch.translate.setup(%7B%22fi%22%3A%7B%22_It%20works!%22%3A%22Toimii!%22%2C%22_close%20iframe%22%3A%22sulje%20iframe%22%2C%22_height%22%3A%22korkeus%22%2C%22_hide%20iframe%22%3A%22piilota%20iframe%22%2C%22_iframe%20%5BMENU%5D%22%3A%22iframen%20%5BMENU%5D%22%2C%22_interactive%22%3A%22vuorovaikutteisuus%22%2C%22_resize%20behavior%22%3A%22k%C3%A4yt%C3%B6s%20kokoa%20muuttaessa%22%2C%22_scale%22%3A%22skaalaus%22%2C%22_set%20iframe%20height%20to%20%5BHEIGHT%5D%22%3A%22aseta%20iframen%20korkeudeksi%20%5BHEIGHT%5D%22%2C%22_set%20iframe%20interactive%20to%20%5BINTERACTIVE%5D%22%3A%22iframen%20vuorovaikutteisuus%20on%20p%C3%A4%C3%A4ll%C3%A4%20%3D%20%20%5BINTERACTIVE%5D%22%2C%22_set%20iframe%20resize%20behavior%20to%20%5BRESIZE%5D%22%3A%22aseta%20iframen%20k%C3%A4yt%C3%B6kseksi%20kokoa%20muuttaessa%20%5BRESIZE%5D%22%2C%22_set%20iframe%20width%20to%20%5BWIDTH%5D%22%3A%22aseta%20iframen%20leveydeksi%20%5BWIDTH%5D%22%2C%22_set%20iframe%20x%20position%20to%20%5BX%5D%22%3A%22aseta%20iframen%20x-sijainniksi%20%5BX%5D%22%2C%22_set%20iframe%20y%20position%20to%20%5BY%5D%22%3A%22aseta%20iframen%20y-sijainniksi%20%5BY%5D%22%2C%22_show%20HTML%20%5BHTML%5D%22%3A%22n%C3%A4yt%C3%A4%20HTML-koodi%20%5BHTML%5D%22%2C%22_show%20iframe%22%3A%22n%C3%A4yt%C3%A4%20iframe%22%2C%22_show%20website%20%5BURL%5D%22%3A%22n%C3%A4yt%C3%A4%20verkkosivusto%20%5BURL%5D%22%2C%22_url%22%3A%22URL-osoite%22%2C%22_viewport%22%3A%22kuvaportti%22%2C%22_visible%22%3A%22n%C3%A4kyvyys%22%2C%22_width%22%3A%22leveys%22%7D%2C%22it%22%3A%7B%22_It%20works!%22%3A%22Funziona!%22%2C%22_close%20iframe%22%3A%22chiudi%20iframe%22%2C%22_height%22%3A%22altezza%22%2C%22_hide%20iframe%22%3A%22nascondi%20iframe%22%2C%22_iframe%20%5BMENU%5D%22%3A%22%5BMENU%5D%20dell'iframe%22%2C%22_interactive%22%3A%22interattivit%C3%A0%22%2C%22_resize%20behavior%22%3A%22comportamento%20quando%20ridimensionato%22%2C%22_scale%22%3A%22scala%22%2C%22_set%20iframe%20height%20to%20%5BHEIGHT%5D%22%3A%22imposta%20larghezza%20dell'iframe%20a%20%5BHEIGHT%5D%22%2C%22_set%20iframe%20interactive%20to%20%5BINTERACTIVE%5D%22%3A%22imposta%20interattivit%C3%A0%20iframe%20a%20%5BINTERACTIVE%5D%22%2C%22_set%20iframe%20resize%20behavior%20to%20%5BRESIZE%5D%22%3A%22imposta%20comportamento%20dell'iframe%20quando%20ridimensionato%20a%20%5BRESIZE%5D%22%2C%22_set%20iframe%20width%20to%20%5BWIDTH%5D%22%3A%22imposta%20larghezza%20dell'iframe%20a%20%5BWIDTH%5D%22%2C%22_set%20iframe%20x%20position%20to%20%5BX%5D%22%3A%22imposta%20posizione%20x%20dell'iframe%20a%20%5BX%5D%22%2C%22_set%20iframe%20y%20position%20to%20%5BY%5D%22%3A%22imposta%20posizione%20y%20dell'iframe%20a%5BY%5D%22%2C%22_show%20HTML%20%5BHTML%5D%22%3A%22mostra%20HTML%20%5BHTML%5D%22%2C%22_show%20iframe%22%3A%22mostra%20iframe%22%2C%22_show%20website%20%5BURL%5D%22%3A%22mostra%20sito%20%5BURL%5D%22%2C%22_visible%22%3A%22visibilit%C3%A0%22%2C%22_width%22%3A%22larghezza%22%7D%2C%22ja%22%3A%7B%22_Iframe%22%3A%22%E5%9F%8B%E3%82%81%E8%BE%BC%E3%81%BF%22%2C%22_It%20works!%22%3A%22%E3%81%86%E3%81%BE%E3%81%8F%E5%8B%95%E4%BD%9C%E3%81%97%E3%81%A6%E3%81%84%E3%81%BE%E3%81%99!%22%2C%22_close%20iframe%22%3A%22%E3%83%9A%E3%83%BC%E3%82%B8%E3%82%92%E9%96%89%E3%81%98%E3%82%8B%22%2C%22_height%22%3A%22%E9%AB%98%E3%81%95%22%2C%22_hide%20iframe%22%3A%22%E3%83%9A%E3%83%BC%E3%82%B8%E3%82%92%E9%9A%A0%E3%81%99%22%2C%22_iframe%20%5BMENU%5D%22%3A%22%E3%83%9A%E3%83%BC%E3%82%B8%E3%81%AE%5BMENU%5D%22%2C%22_interactive%22%3A%22%E5%8B%95%E3%81%8D%E3%81%8C%E3%81%82%E3%82%8B%E3%81%8B%3F%22%2C%22_resize%20behavior%22%3A%22%E3%82%B5%E3%82%A4%E3%82%BA%E5%A4%89%E6%9B%B4%E5%8B%95%E4%BD%9C%22%2C%22_scale%22%3A%22%E3%82%B9%E3%82%B1%E3%83%BC%E3%83%AB%22%2C%22_set%20iframe%20height%20to%20%5BHEIGHT%5D%22%3A%22%E3%83%9A%E3%83%BC%E3%82%B8%E3%81%AE%E9%AB%98%E3%81%95%E3%82%92%5BHEIGHT%5D%E3%81%AB%E3%81%99%E3%82%8B%22%2C%22_set%20iframe%20interactive%20to%20%5BINTERACTIVE%5D%22%3A%22%E3%83%9A%E3%83%BC%E3%82%B8%E3%81%8C%E5%8B%95%E3%81%84%E3%81%A6%E3%81%84%E3%82%8B%E3%81%8B%E3%82%92%5BINTERACTIVE%5D%E3%81%AB%E3%81%99%E3%82%8B%22%2C%22_set%20iframe%20resize%20behavior%20to%20%5BRESIZE%5D%22%3A%22%E5%9F%8B%E3%82%81%E8%BE%BC%E3%81%BF%E3%81%AE%E3%82%B5%E3%82%A4%E3%82%BA%E5%A4%89%E6%9B%B4%E5%8B%95%E4%BD%9C%E3%82%92%5BRESIZE%5D%E3%81%AB%E3%81%99%E3%82%8B%22%2C%22_set%20iframe%20width%20to%20%5BWIDTH%5D%22%3A%22%E3%83%9A%E3%83%BC%E3%82%B8%E3%81%AE%E6%A8%AA%E5%B9%85%E3%82%92%5BWIDTH%5D%E3%81%AB%E3%81%99%E3%82%8B%22%2C%22_set%20iframe%20x%20position%20to%20%5BX%5D%22%3A%22%E3%83%9A%E3%83%BC%E3%82%B8%E3%81%AEx%E5%BA%A7%E6%A8%99%E3%82%92%5BX%5D%E3%81%AB%E3%81%99%E3%82%8B%22%2C%22_set%20iframe%20y%20position%20to%20%5BY%5D%22%3A%22%E3%83%9A%E3%83%BC%E3%82%B8%E3%81%AEy%E5%BA%A7%E6%A8%99%E3%82%92%5BY%5D%E3%81%AB%E3%81%99%E3%82%8B%22%2C%22_show%20HTML%20%5BHTML%5D%22%3A%22%5BHTML%5D%E3%81%AEHTML%E3%82%92%E8%A1%A8%E7%A4%BA%E3%81%99%E3%82%8B%22%2C%22_show%20iframe%22%3A%22%E3%83%9A%E3%83%BC%E3%82%B8%E3%82%92%E8%A1%A8%E7%A4%BA%E3%81%99%E3%82%8B%22%2C%22_show%20website%20%5BURL%5D%22%3A%22%5BURL%5D%E3%81%AE%E3%82%A6%E3%82%A7%E3%83%96%E3%82%B5%E3%82%A4%E3%83%88%E3%82%92%E8%A1%A8%E7%A4%BA%E3%81%99%E3%82%8B%22%2C%22_url%22%3A%22URL%22%2C%22_visible%22%3A%22%E8%A6%8B%E3%81%88%E3%82%8B%E3%81%8B%3F%22%2C%22_width%22%3A%22%E6%A8%AA%E5%B9%85%22%7D%2C%22ko%22%3A%7B%22_close%20iframe%22%3A%22iframe%20%EB%8B%AB%EA%B8%B0%22%2C%22_height%22%3A%22%EB%86%92%EC%9D%B4%22%2C%22_hide%20iframe%22%3A%22iframe%20%EC%88%A8%EA%B8%B0%EA%B8%B0%22%2C%22_iframe%20%5BMENU%5D%22%3A%22iframe%EC%9D%98%20%5BMENU%5D%22%2C%22_interactive%22%3A%22%EC%83%81%ED%98%B8%EC%9E%91%EC%9A%A9%20%EC%97%AC%EB%B6%80%22%2C%22_resize%20behavior%22%3A%22%ED%81%AC%EA%B8%B0%20%EC%A1%B0%EC%A0%95%20%EB%B0%A9%EC%8B%9D%22%2C%22_set%20iframe%20height%20to%20%5BHEIGHT%5D%22%3A%22iframe%20%EB%86%92%EC%9D%B4%EB%A5%BC%20%5BHEIGHT%5D(%EC%9C%BC)%EB%A1%9C%20%EC%A0%95%ED%95%98%EA%B8%B0%22%2C%22_set%20iframe%20interactive%20to%20%5BINTERACTIVE%5D%22%3A%22iframe%20%EC%83%81%ED%98%B8%EC%9E%91%EC%9A%A9%20%EC%97%AC%EB%B6%80%EB%A5%BC%20%5BINTERACTIVE%5D(%EC%9C%BC)%EB%A1%9C%20%EC%A0%95%ED%95%98%EA%B8%B0%22%2C%22_set%20iframe%20resize%20behavior%20to%20%5BRESIZE%5D%22%3A%22iframe%20%ED%81%AC%EA%B8%B0%20%EC%A1%B0%EC%A0%95%20%EB%B0%A9%EC%8B%9D%EC%9D%84%20%5BRESIZE%5D(%EC%9C%BC)%EB%A1%9C%20%EC%A0%95%ED%95%98%EA%B8%B0%22%2C%22_set%20iframe%20width%20to%20%5BWIDTH%5D%22%3A%22iframe%20%EB%84%93%EC%9D%B4%EB%A5%BC%20%5BWIDTH%5D(%EC%9C%BC)%EB%A1%9C%20%EC%A0%95%ED%95%98%EA%B8%B0%22%2C%22_set%20iframe%20x%20position%20to%20%5BX%5D%22%3A%22iframe%20x%EC%A2%8C%ED%91%9C%EB%A5%BC%20%5BX%5D(%EC%9C%BC)%EB%A1%9C%20%EC%A0%95%ED%95%98%EA%B8%B0%22%2C%22_set%20iframe%20y%20position%20to%20%5BY%5D%22%3A%22iframe%20y%EC%A2%8C%ED%91%9C%EB%A5%BC%20%5BY%5D(%EC%9C%BC)%EB%A1%9C%20%EC%A0%95%ED%95%98%EA%B8%B0%22%2C%22_show%20HTML%20%5BHTML%5D%22%3A%22HTML%20%5BHTML%5D%20%EB%B3%B4%EC%9D%B4%EA%B8%B0%22%2C%22_show%20iframe%22%3A%22iframe%20%EB%B3%B4%EC%9D%B4%EA%B8%B0%22%2C%22_show%20website%20%5BURL%5D%22%3A%22%EC%9B%B9%EC%82%AC%EC%9D%B4%ED%8A%B8%20%5BURL%5D%20%EB%B3%B4%EC%9D%B4%EA%B8%B0%22%2C%22_visible%22%3A%22%EB%B3%B4%EC%9E%84%20%EC%97%AC%EB%B6%80%22%2C%22_width%22%3A%22%EB%84%93%EC%9D%B4%22%7D%2C%22nb%22%3A%7B%22_Iframe%22%3A%22IFrame%22%2C%22_It%20works!%22%3A%22Det%20fungerer!%22%2C%22_close%20iframe%22%3A%22lukk%20iframe%22%2C%22_height%22%3A%22h%C3%B8yde%22%2C%22_hide%20iframe%22%3A%22skjul%20iframe%22%2C%22_interactive%22%3A%22interaktiv%22%2C%22_resize%20behavior%22%3A%22endre%20st%C3%B8rrelsesoppf%C3%B8rsel%22%2C%22_scale%22%3A%22skala%22%2C%22_set%20iframe%20height%20to%20%5BHEIGHT%5D%22%3A%22set%20iframe%20h%C3%B8yde%20til%20%5BHEIGHT%5D%22%2C%22_set%20iframe%20interactive%20to%20%5BINTERACTIVE%5D%22%3A%22sett%20iframe%20interaktiv%20til%20%5BINTERACTIVE%5D%22%2C%22_set%20iframe%20resize%20behavior%20to%20%5BRESIZE%5D%22%3A%22sett%20iframe%20resize%20oppf%C3%B8rsel%20til%20%5BRESIZE%5D%22%2C%22_set%20iframe%20width%20to%20%5BWIDTH%5D%22%3A%22set%20iframe%20bredde%20til%20%5BWIDTH%5D%22%2C%22_set%20iframe%20x%20position%20to%20%5BX%5D%22%3A%22sett%20iframe%20x-posisjon%20til%20%5BX%5D%22%2C%22_set%20iframe%20y%20position%20to%20%5BY%5D%22%3A%22sett%20iframe%20y-posisjon%20til%20%5BY%5D%22%2C%22_show%20HTML%20%5BHTML%5D%22%3A%22vis%20HTML%20%5BHTML%5D%22%2C%22_show%20iframe%22%3A%22vis%20iframe%22%2C%22_show%20website%20%5BURL%5D%22%3A%22vis%20nettside%20%5BURL%5D%22%2C%22_viewport%22%3A%22visningsomr%C3%A5de%22%2C%22_visible%22%3A%22synlig%22%2C%22_width%22%3A%22bredde%22%7D%2C%22nl%22%3A%7B%22_It%20works!%22%3A%22Het%20werkt!%22%2C%22_close%20iframe%22%3A%22sluit%20iframe%22%2C%22_height%22%3A%22hoogte%22%2C%22_hide%20iframe%22%3A%22verberg%20iframe%22%2C%22_iframe%20%5BMENU%5D%22%3A%22%5BMENU%5D%20van%20iframe%22%2C%22_interactive%22%3A%22interactief%3F%22%2C%22_resize%20behavior%22%3A%22formaatwijzigingsgedrag%22%2C%22_scale%22%3A%22speelveld%22%2C%22_set%20iframe%20height%20to%20%5BHEIGHT%5D%22%3A%22maak%20hoogte%20van%20iframe%20%5BHEIGHT%5D%22%2C%22_set%20iframe%20interactive%20to%20%5BINTERACTIVE%5D%22%3A%22maak%20iframe%20interactief%3F%20%5BINTERACTIVE%5D%22%2C%22_set%20iframe%20resize%20behavior%20to%20%5BRESIZE%5D%22%3A%22maak%20formaatwijzigingsgedrag%20van%20iframe%20%5BRESIZE%5D%22%2C%22_set%20iframe%20width%20to%20%5BWIDTH%5D%22%3A%22maak%20breedte%20van%20iframe%20%5BWIDTH%5D%22%2C%22_set%20iframe%20x%20position%20to%20%5BX%5D%22%3A%22maak%20x-positie%20van%20iframe%20%5BX%5D%22%2C%22_set%20iframe%20y%20position%20to%20%5BY%5D%22%3A%22maak%20y-positie%20van%20iframe%20%5BY%5D%22%2C%22_show%20HTML%20%5BHTML%5D%22%3A%22toon%20HTML%20%5BHTML%5D%22%2C%22_show%20iframe%22%3A%22toon%20iframe%22%2C%22_show%20website%20%5BURL%5D%22%3A%22toon%20website%20%5BURL%5D%22%2C%22_viewport%22%3A%22beeldscherm%22%2C%22_visible%22%3A%22zichtbaar%3F%22%2C%22_width%22%3A%22breedte%22%7D%2C%22pl%22%3A%7B%22_height%22%3A%22wysoko%C5%9B%C4%87%22%2C%22_scale%22%3A%22skala%22%2C%22_width%22%3A%22szeroko%C5%9B%C4%87%22%7D%2C%22ru%22%3A%7B%22_It%20works!%22%3A%22%D0%A0%D0%B0%D0%B1%D0%BE%D1%82%D0%B0%D0%B5%D1%82!%22%2C%22_close%20iframe%22%3A%22%D0%B7%D0%B0%D0%BA%D1%80%D1%8B%D1%82%D1%8C%20iframe%22%2C%22_height%22%3A%22%D0%B2%D1%8B%D1%81%D0%BE%D1%82%D0%B0%22%2C%22_hide%20iframe%22%3A%22%D1%81%D0%BF%D1%80%D1%8F%D1%82%D0%B0%D1%82%D1%8C%20iframe%22%2C%22_interactive%22%3A%22%D0%B2%D0%B7%D0%B0%D0%B8%D0%BC%D0%BE%D0%B4%D0%B5%D0%B9%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D0%BE%D1%81%D1%82%D1%8C%22%2C%22_resize%20behavior%22%3A%22%D0%BE%D1%81%D0%BD%D0%BE%D0%B2%D0%BD%D0%BE%D0%B5%20%D0%B8%D0%B7%D0%BC%D0%B5%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5%20%D1%80%D0%B0%D0%B7%D0%BC%D0%B5%D1%80%D0%B0%22%2C%22_scale%22%3A%22%D1%80%D0%B0%D0%B7%D0%BC%D0%B5%D1%80%22%2C%22_set%20iframe%20height%20to%20%5BHEIGHT%5D%22%3A%22%D0%B7%D0%B0%D0%B4%D0%B0%D1%82%D1%8C%20%D0%B2%D1%8B%D1%81%D0%BE%D1%82%D1%83%20iframe%20%D0%B2%20%5BHEIGHT%5D%22%2C%22_set%20iframe%20interactive%20to%20%5BINTERACTIVE%5D%22%3A%22%D0%B7%D0%B0%D0%B4%D0%B0%D1%82%D1%8C%20%D0%B2%D0%B7%D0%B0%D0%B8%D0%BC%D0%BE%D0%B4%D0%B5%D0%B9%D1%81%D1%82%D0%B2%D0%B8%D0%B5%20%D1%81%20iframe%20%D0%BD%D0%B0%20%5BINTERACTIVE%5D%22%2C%22_set%20iframe%20resize%20behavior%20to%20%5BRESIZE%5D%22%3A%22%D0%B7%D0%B0%D0%B4%D0%B0%D1%82%D1%8C%20%D0%BF%D0%BE%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%B8%D0%B7%D0%BC%D0%B5%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F%20%D1%80%D0%B0%D0%B7%D0%BC%D0%B5%D1%80%D0%B0%20iframe%20%D0%BD%D0%B0%20%5BRESIZE%5D%22%2C%22_set%20iframe%20width%20to%20%5BWIDTH%5D%22%3A%22%D0%B7%D0%B0%D0%B4%D0%B0%D1%82%D1%8C%20%D1%88%D0%B8%D1%80%D0%B8%D0%BD%D1%83%20iframe%20%D0%B2%20%5BWIDTH%5D%22%2C%22_set%20iframe%20x%20position%20to%20%5BX%5D%22%3A%22%D0%B7%D0%B0%D0%B4%D0%B0%D1%82%D1%8C%20%D0%BF%D0%BE%D0%B7%D0%B8%D1%86%D0%B8%D1%8E%20iframe%20x%20%D0%B2%20%5BX%5D%22%2C%22_set%20iframe%20y%20position%20to%20%5BY%5D%22%3A%22%D0%B7%D0%B0%D0%B4%D0%B0%D1%82%D1%8C%20%D0%BF%D0%BE%D0%B7%D0%B8%D1%86%D0%B8%D1%8E%20iframe%20y%20%D0%B2%20%5BY%5D%22%2C%22_show%20HTML%20%5BHTML%5D%22%3A%22%D0%BF%D0%BE%D0%BA%D0%B0%D0%B7%D0%B0%D1%82%D1%8C%20HTML%20%5BHTML%5D%22%2C%22_show%20iframe%22%3A%22%D0%BF%D0%BE%D0%BA%D0%B0%D0%B7%D0%B0%D1%82%D1%8C%20iframe%22%2C%22_show%20website%20%5BURL%5D%22%3A%22%D0%BF%D0%BE%D0%BA%D0%B0%D0%B7%D0%B0%D1%82%D1%8C%20%D0%B2%D0%B5%D0%B1%D1%81%D0%B0%D0%B9%D1%82%20%5BURL%5D%22%2C%22_viewport%22%3A%22%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C%20%D0%BF%D1%80%D0%BE%D1%81%D0%BC%D0%BE%D1%82%D1%80%D0%B0%22%2C%22_visible%22%3A%22%D0%B2%D0%B8%D0%B4%D0%B5%D0%BD%22%2C%22_width%22%3A%22%D1%88%D0%B8%D1%80%D0%B8%D0%BD%D0%B0%22%7D%2C%22uk%22%3A%7B%22_height%22%3A%22%D0%B2%D0%B8%D1%81%D0%BE%D1%82%D0%B0%22%2C%22_width%22%3A%22%D1%88%D0%B8%D1%80%D0%B8%D0%BD%D0%B0%22%7D%2C%22zh-cn%22%3A%7B%22_Iframe%22%3A%22%E5%86%85%E5%B5%8C%E6%A1%86%E6%9E%B6%22%2C%22_It%20works!%22%3A%22%E8%83%BD%E7%94%A8%EF%BC%81%22%2C%22_close%20iframe%22%3A%22%E9%80%80%E5%87%BA%20iframe%22%2C%22_height%22%3A%22%E9%AB%98%E5%BA%A6%22%2C%22_hide%20iframe%22%3A%22%E9%9A%90%E8%97%8F%20iframe%22%2C%22_iframe%20%5BMENU%5D%22%3A%22iframe%20%E7%9A%84%5BMENU%5D%22%2C%22_interactive%22%3A%22%E5%8F%AF%E4%BB%A5%E4%B8%8E%E9%BC%A0%E6%A0%87%E4%BA%A4%E4%BA%92%EF%BC%9F%22%2C%22_resize%20behavior%22%3A%22%E8%B0%83%E6%95%B4%E5%A4%A7%E5%B0%8F%E8%A1%8C%E4%B8%BA%22%2C%22_scale%22%3A%22%E8%A7%84%E6%A8%A1%22%2C%22_set%20iframe%20height%20to%20%5BHEIGHT%5D%22%3A%22%E8%AE%BE%E7%BD%AE%20iframe%20%E7%9A%84%E9%AB%98%E5%BA%A6%E4%B8%BA%5BHEIGHT%5D%22%2C%22_set%20iframe%20interactive%20to%20%5BINTERACTIVE%5D%22%3A%22%E8%AE%BE%E7%BD%AE%20iframe%20%E4%BA%A4%E4%BA%92%E4%B8%BA%5BINTERACTIVE%5D%22%2C%22_set%20iframe%20resize%20behavior%20to%20%5BRESIZE%5D%22%3A%22%E8%AE%BE%E7%BD%AE%20iframe%20%E8%B0%83%E6%95%B4%E5%A4%A7%E5%B0%8F%E8%A1%8C%E4%B8%BA%E4%B8%BA%20%5BRESIZE%5D%22%2C%22_set%20iframe%20width%20to%20%5BWIDTH%5D%22%3A%22%E8%AE%BE%E7%BD%AE%20iframe%20%E7%9A%84%E5%AE%BD%E5%BA%A6%E4%B8%BA%5BWIDTH%5D%22%2C%22_set%20iframe%20x%20position%20to%20%5BX%5D%22%3A%22%E8%AE%BE%E7%BD%AE%20iframe%20x%E5%9D%90%E6%A0%87%E4%B8%BA%5BX%5D%22%2C%22_set%20iframe%20y%20position%20to%20%5BY%5D%22%3A%22%E8%AE%BE%E7%BD%AE%20iframe%20y%E5%9D%90%E6%A0%87%E4%B8%BA%5BY%5D%22%2C%22_show%20HTML%20%5BHTML%5D%22%3A%22%E6%98%BE%E7%A4%BA%E6%9D%A5%E8%87%AA%E6%96%87%E6%9C%AC%5BHTML%5D%E7%9A%84%E7%BD%91%E9%A1%B5%22%2C%22_show%20iframe%22%3A%22%E6%98%BE%E7%A4%BA%20iframe%22%2C%22_show%20website%20%5BURL%5D%22%3A%22%E6%98%BE%E7%A4%BA%E6%9D%A5%E8%87%AAURL%5BURL%5D%E7%9A%84%E7%BD%91%E9%A1%B5%22%2C%22_url%22%3A%22URL%22%2C%22_viewport%22%3A%22%E8%A7%86%E7%82%B9%22%2C%22_visible%22%3A%22%E6%98%BE%E7%A4%BA%E7%8A%B6%E6%80%81%22%2C%22_width%22%3A%22%E5%AE%BD%E5%BA%A6%22%7D%7D)%3B%2F*%20end%20generated%20l10n%20code%20*%2F(function%20(Scratch)%20%7B%0A%20%20%22use%20strict%22%3B%0A%0A%20%20%2F**%20%40type%20%7BHTMLIFrameElement%7Cnull%7D%20*%2F%0A%20%20let%20iframe%20%3D%20null%3B%0A%20%20let%20overlay%20%3D%20null%3B%0A%0A%20%20const%20featurePolicy%20%3D%20%7B%0A%20%20%20%20accelerometer%3A%20%22'none'%22%2C%0A%20%20%20%20%22ambient-light-sensor%22%3A%20%22'none'%22%2C%0A%20%20%20%20battery%3A%20%22'none'%22%2C%0A%20%20%20%20camera%3A%20%22'none'%22%2C%0A%20%20%20%20%22display-capture%22%3A%20%22'none'%22%2C%0A%20%20%20%20%22document-domain%22%3A%20%22'none'%22%2C%0A%20%20%20%20%22encrypted-media%22%3A%20%22'none'%22%2C%0A%20%20%20%20fullscreen%3A%20%22'none'%22%2C%0A%20%20%20%20geolocation%3A%20%22'none'%22%2C%0A%20%20%20%20gyroscope%3A%20%22'none'%22%2C%0A%20%20%20%20magnetometer%3A%20%22'none'%22%2C%0A%20%20%20%20microphone%3A%20%22'none'%22%2C%0A%20%20%20%20midi%3A%20%22'none'%22%2C%0A%20%20%20%20payment%3A%20%22'none'%22%2C%0A%20%20%20%20%22picture-in-picture%22%3A%20%22'none'%22%2C%0A%20%20%20%20%22publickey-credentials-get%22%3A%20%22'none'%22%2C%0A%20%20%20%20%22speaker-selection%22%3A%20%22'none'%22%2C%0A%20%20%20%20usb%3A%20%22'none'%22%2C%0A%20%20%20%20vibrate%3A%20%22'none'%22%2C%0A%20%20%20%20vr%3A%20%22'none'%22%2C%0A%20%20%20%20%22screen-wake-lock%22%3A%20%22'none'%22%2C%0A%20%20%20%20%22web-share%22%3A%20%22'none'%22%2C%0A%20%20%20%20%22interest-cohort%22%3A%20%22'none'%22%2C%0A%20%20%7D%3B%0A%0A%20%20const%20SANDBOX%20%3D%20%5B%0A%20%20%20%20%22allow-same-origin%22%2C%0A%20%20%20%20%22allow-scripts%22%2C%0A%20%20%20%20%22allow-forms%22%2C%0A%20%20%20%20%22allow-modals%22%2C%0A%20%20%20%20%22allow-popups%22%2C%0A%0A%20%20%20%20%2F%2F%20The%20big%20one%20we%20don't%20want%20to%20include%20is%20allow-top-navigation%0A%20%20%5D%3B%0A%0A%20%20let%20x%20%3D%200%3B%0A%20%20let%20y%20%3D%200%3B%0A%20%20let%20width%20%3D%20-1%3B%20%2F%2F%20negative%20means%20default%0A%20%20let%20height%20%3D%20-1%3B%20%2F%2F%20negative%20means%20default%0A%20%20let%20interactive%20%3D%20true%3B%0A%20%20let%20resizeBehavior%20%3D%20%22scale%22%3B%0A%0A%20%20const%20updateFrameAttributes%20%3D%20()%20%3D%3E%20%7B%0A%20%20%20%20if%20(!iframe)%20%7B%0A%20%20%20%20%20%20return%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20iframe.style.pointerEvents%20%3D%20interactive%20%3F%20%22auto%22%20%3A%20%22none%22%3B%0A%0A%20%20%20%20const%20%7B%20stageWidth%2C%20stageHeight%20%7D%20%3D%20Scratch.vm.runtime%3B%0A%20%20%20%20const%20effectiveWidth%20%3D%20width%20%3E%3D%200%20%3F%20width%20%3A%20stageWidth%3B%0A%20%20%20%20const%20effectiveHeight%20%3D%20height%20%3E%3D%200%20%3F%20height%20%3A%20stageHeight%3B%0A%0A%20%20%20%20if%20(resizeBehavior%20%3D%3D%3D%20%22scale%22)%20%7B%0A%20%20%20%20%20%20iframe.style.width%20%3D%20%60%24%7BeffectiveWidth%7Dpx%60%3B%0A%20%20%20%20%20%20iframe.style.height%20%3D%20%60%24%7BeffectiveHeight%7Dpx%60%3B%0A%0A%20%20%20%20%20%20iframe.style.transform%20%3D%20%60translate(%24%7B-effectiveWidth%20%2F%202%20%2B%20x%7Dpx%2C%20%24%7B%0A%20%20%20%20%20%20%20%20-effectiveHeight%20%2F%202%20-%20y%0A%20%20%20%20%20%20%7Dpx)%60%3B%0A%20%20%20%20%20%20iframe.style.top%20%3D%20%220%22%3B%0A%20%20%20%20%20%20iframe.style.left%20%3D%20%220%22%3B%0A%20%20%20%20%7D%20else%20%7B%0A%20%20%20%20%20%20%2F%2F%20As%20the%20stage%20is%20resized%20in%20fullscreen%20mode%2C%20only%20%25%20can%20be%20relied%20upon%0A%20%20%20%20%20%20iframe.style.width%20%3D%20%60%24%7B(effectiveWidth%20%2F%20stageWidth)%20*%20100%7D%25%60%3B%0A%20%20%20%20%20%20iframe.style.height%20%3D%20%60%24%7B(effectiveHeight%20%2F%20stageHeight)%20*%20100%7D%25%60%3B%0A%0A%20%20%20%20%20%20iframe.style.transform%20%3D%20%22%22%3B%0A%20%20%20%20%20%20iframe.style.top%20%3D%20%60%24%7B%0A%20%20%20%20%20%20%20%20(0.5%20-%20effectiveHeight%20%2F%202%20%2F%20stageHeight%20-%20y%20%2F%20stageHeight)%20*%20100%0A%20%20%20%20%20%20%7D%25%60%3B%0A%20%20%20%20%20%20iframe.style.left%20%3D%20%60%24%7B%0A%20%20%20%20%20%20%20%20(0.5%20-%20effectiveWidth%20%2F%202%20%2F%20stageWidth%20%2B%20x%20%2F%20stageWidth)%20*%20100%0A%20%20%20%20%20%20%7D%25%60%3B%0A%20%20%20%20%7D%0A%20%20%7D%3B%0A%0A%20%20const%20getOverlayMode%20%3D%20()%20%3D%3E%0A%20%20%20%20resizeBehavior%20%3D%3D%3D%20%22scale%22%20%3F%20%22scale-centered%22%20%3A%20%22manual%22%3B%0A%0A%20%20const%20createFrame%20%3D%20(src)%20%3D%3E%20%7B%0A%20%20%20%20iframe%20%3D%20document.createElement(%22iframe%22)%3B%0A%20%20%20%20iframe.style.width%20%3D%20%22100%25%22%3B%0A%20%20%20%20iframe.style.height%20%3D%20%22100%25%22%3B%0A%20%20%20%20iframe.style.border%20%3D%20%22none%22%3B%0A%20%20%20%20iframe.style.position%20%3D%20%22absolute%22%3B%0A%20%20%20%20iframe.setAttribute(%22sandbox%22%2C%20SANDBOX.join(%22%20%22))%3B%0A%20%20%20%20iframe.setAttribute(%0A%20%20%20%20%20%20%22allow%22%2C%0A%20%20%20%20%20%20Object.entries(featurePolicy)%0A%20%20%20%20%20%20%20%20.map((%5Bname%2C%20permission%5D)%20%3D%3E%20%60%24%7Bname%7D%20%24%7Bpermission%7D%60)%0A%20%20%20%20%20%20%20%20.join(%22%3B%20%22)%0A%20%20%20%20)%3B%0A%20%20%20%20iframe.setAttribute(%22allowtransparency%22%2C%20%22true%22)%3B%0A%20%20%20%20iframe.setAttribute(%22allowtransparency%22%2C%20%22true%22)%3B%0A%20%20%20%20iframe.setAttribute(%22src%22%2C%20src)%3B%0A%0A%20%20%20%20overlay%20%3D%20Scratch.renderer.addOverlay(iframe%2C%20getOverlayMode())%3B%0A%20%20%20%20updateFrameAttributes()%3B%0A%20%20%7D%3B%0A%0A%20%20const%20closeFrame%20%3D%20()%20%3D%3E%20%7B%0A%20%20%20%20if%20(iframe)%20%7B%0A%20%20%20%20%20%20Scratch.renderer.removeOverlay(iframe)%3B%0A%20%20%20%20%20%20iframe%20%3D%20null%3B%0A%20%20%20%20%20%20overlay%20%3D%20null%3B%0A%20%20%20%20%7D%0A%20%20%7D%3B%0A%0A%20%20Scratch.vm.on(%22STAGE_SIZE_CHANGED%22%2C%20updateFrameAttributes)%3B%0A%0A%20%20Scratch.vm.runtime.on(%22RUNTIME_DISPOSED%22%2C%20closeFrame)%3B%0A%0A%20%20class%20IframeExtension%20%7B%0A%20%20%20%20getInfo()%20%7B%0A%20%20%20%20%20%20return%20%7B%0A%20%20%20%20%20%20%20%20name%3A%20Scratch.translate(%22Iframe%22)%2C%0A%20%20%20%20%20%20%20%20id%3A%20%22iframe%22%2C%0A%20%20%20%20%20%20%20%20blocks%3A%20%5B%0A%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20opcode%3A%20%22display%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20blockType%3A%20Scratch.BlockType.COMMAND%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20text%3A%20Scratch.translate(%22show%20website%20%5BURL%5D%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20arguments%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20URL%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20type%3A%20Scratch.ArgumentType.STRING%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20defaultValue%3A%20%22https%3A%2F%2Fextensions.turbowarp.org%2Fhello.html%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20opcode%3A%20%22displayHTML%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20blockType%3A%20Scratch.BlockType.COMMAND%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20text%3A%20Scratch.translate(%22show%20HTML%20%5BHTML%5D%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20arguments%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20HTML%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20type%3A%20Scratch.ArgumentType.STRING%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20defaultValue%3A%20%60%3Ch1%3E%24%7BScratch.translate(%22It%20works!%22)%7D%3C%2Fh1%3E%60%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%22---%22%2C%0A%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20opcode%3A%20%22show%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20blockType%3A%20Scratch.BlockType.COMMAND%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20text%3A%20Scratch.translate(%22show%20iframe%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20opcode%3A%20%22hide%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20blockType%3A%20Scratch.BlockType.COMMAND%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20text%3A%20Scratch.translate(%22hide%20iframe%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20opcode%3A%20%22close%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20blockType%3A%20Scratch.BlockType.COMMAND%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20text%3A%20Scratch.translate(%22close%20iframe%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%22---%22%2C%0A%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20opcode%3A%20%22get%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20blockType%3A%20Scratch.BlockType.REPORTER%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20text%3A%20Scratch.translate(%22iframe%20%5BMENU%5D%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20arguments%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20MENU%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20type%3A%20Scratch.ArgumentType.STRING%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20menu%3A%20%22getMenu%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20opcode%3A%20%22setX%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20blockType%3A%20Scratch.BlockType.COMMAND%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20text%3A%20Scratch.translate(%22set%20iframe%20x%20position%20to%20%5BX%5D%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20arguments%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20X%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20type%3A%20Scratch.ArgumentType.NUMBER%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20defaultValue%3A%20%220%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20opcode%3A%20%22setY%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20blockType%3A%20Scratch.BlockType.COMMAND%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20text%3A%20Scratch.translate(%22set%20iframe%20y%20position%20to%20%5BY%5D%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20arguments%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20Y%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20type%3A%20Scratch.ArgumentType.NUMBER%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20defaultValue%3A%20%220%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20opcode%3A%20%22setWidth%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20blockType%3A%20Scratch.BlockType.COMMAND%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20text%3A%20Scratch.translate(%22set%20iframe%20width%20to%20%5BWIDTH%5D%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20arguments%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20WIDTH%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20type%3A%20Scratch.ArgumentType.NUMBER%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20defaultValue%3A%20Scratch.vm.runtime.stageWidth%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20opcode%3A%20%22setHeight%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20blockType%3A%20Scratch.BlockType.COMMAND%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20text%3A%20Scratch.translate(%22set%20iframe%20height%20to%20%5BHEIGHT%5D%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20arguments%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20HEIGHT%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20type%3A%20Scratch.ArgumentType.NUMBER%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20defaultValue%3A%20Scratch.vm.runtime.stageHeight%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20opcode%3A%20%22setInteractive%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20blockType%3A%20Scratch.BlockType.COMMAND%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20text%3A%20Scratch.translate(%22set%20iframe%20interactive%20to%20%5BINTERACTIVE%5D%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20arguments%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20INTERACTIVE%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20type%3A%20Scratch.ArgumentType.STRING%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20menu%3A%20%22interactiveMenu%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20opcode%3A%20%22setResize%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20blockType%3A%20Scratch.BlockType.COMMAND%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20text%3A%20Scratch.translate(%22set%20iframe%20resize%20behavior%20to%20%5BRESIZE%5D%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20arguments%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20RESIZE%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20type%3A%20Scratch.ArgumentType.STRING%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20menu%3A%20%22resizeMenu%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%5D%2C%0A%20%20%20%20%20%20%20%20menus%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20getMenu%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20acceptReporters%3A%20true%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20items%3A%20%5B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20Scratch.translate(%22url%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20Scratch.translate(%22visible%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22x%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22y%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20Scratch.translate(%22width%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20Scratch.translate(%22height%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20Scratch.translate(%22interactive%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20Scratch.translate(%22resize%20behavior%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%5D%2C%0A%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20interactiveMenu%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20acceptReporters%3A%20true%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20items%3A%20%5B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2F%2F%20The%20getter%20blocks%20will%20return%20English%20regardless%20of%20translating%20these%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22true%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22false%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%5D%2C%0A%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20resizeMenu%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20acceptReporters%3A%20true%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20items%3A%20%5B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20text%3A%20Scratch.translate(%22scale%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20value%3A%20%22scale%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20text%3A%20Scratch.translate(%22viewport%22)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20value%3A%20%22viewport%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%5D%2C%0A%20%20%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20%7D%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20async%20display(%7B%20URL%20%7D)%20%7B%0A%20%20%20%20%20%20closeFrame()%3B%0A%20%20%20%20%20%20if%20(await%20Scratch.canEmbed(URL))%20%7B%0A%20%20%20%20%20%20%20%20createFrame(Scratch.Cast.toString(URL))%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20async%20displayHTML(%7B%20HTML%20%7D)%20%7B%0A%20%20%20%20%20%20closeFrame()%3B%0A%20%20%20%20%20%20const%20url%20%3D%20%60data%3Atext%2Fhtml%3B%2C%24%7BencodeURIComponent(%0A%20%20%20%20%20%20%20%20Scratch.Cast.toString(HTML)%0A%20%20%20%20%20%20)%7D%60%3B%0A%20%20%20%20%20%20if%20(await%20Scratch.canEmbed(url))%20%7B%0A%20%20%20%20%20%20%20%20createFrame(url)%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20show()%20%7B%0A%20%20%20%20%20%20if%20(iframe)%20%7B%0A%20%20%20%20%20%20%20%20iframe.style.display%20%3D%20%22%22%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20hide()%20%7B%0A%20%20%20%20%20%20if%20(iframe)%20%7B%0A%20%20%20%20%20%20%20%20iframe.style.display%20%3D%20%22none%22%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20close()%20%7B%0A%20%20%20%20%20%20closeFrame()%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20get(%7B%20MENU%20%7D)%20%7B%0A%20%20%20%20%20%20MENU%20%3D%20Scratch.Cast.toString(MENU)%3B%0A%20%20%20%20%20%20if%20(MENU%20%3D%3D%3D%20%22url%22)%20%7B%0A%20%20%20%20%20%20%20%20if%20(iframe)%20return%20iframe.getAttribute(%22src%22)%3B%0A%20%20%20%20%20%20%20%20return%20%22%22%3B%0A%20%20%20%20%20%20%7D%20else%20if%20(MENU%20%3D%3D%3D%20%22visible%22)%20%7B%0A%20%20%20%20%20%20%20%20return%20!!iframe%20%26%26%20iframe.style.display%20!%3D%3D%20%22none%22%3B%0A%20%20%20%20%20%20%7D%20else%20if%20(MENU%20%3D%3D%3D%20%22x%22)%20%7B%0A%20%20%20%20%20%20%20%20return%20x%3B%0A%20%20%20%20%20%20%7D%20else%20if%20(MENU%20%3D%3D%3D%20%22y%22)%20%7B%0A%20%20%20%20%20%20%20%20return%20y%3B%0A%20%20%20%20%20%20%7D%20else%20if%20(MENU%20%3D%3D%3D%20%22width%22)%20%7B%0A%20%20%20%20%20%20%20%20return%20width%20%3E%3D%200%20%3F%20width%20%3A%20Scratch.vm.runtime.stageWidth%3B%0A%20%20%20%20%20%20%7D%20else%20if%20(MENU%20%3D%3D%3D%20%22height%22)%20%7B%0A%20%20%20%20%20%20%20%20return%20height%20%3E%3D%200%20%3F%20height%20%3A%20Scratch.vm.runtime.stageHeight%3B%0A%20%20%20%20%20%20%7D%20else%20if%20(MENU%20%3D%3D%3D%20%22interactive%22)%20%7B%0A%20%20%20%20%20%20%20%20return%20interactive%3B%0A%20%20%20%20%20%20%7D%20else%20if%20(MENU%20%3D%3D%3D%20%22resize%20behavior%22)%20%7B%0A%20%20%20%20%20%20%20%20return%20resizeBehavior%3B%0A%20%20%20%20%20%20%7D%20else%20%7B%0A%20%20%20%20%20%20%20%20return%20%22%22%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20setX(%7B%20X%20%7D)%20%7B%0A%20%20%20%20%20%20x%20%3D%20Scratch.Cast.toNumber(X)%3B%0A%20%20%20%20%20%20updateFrameAttributes()%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20setY(%7B%20Y%20%7D)%20%7B%0A%20%20%20%20%20%20y%20%3D%20Scratch.Cast.toNumber(Y)%3B%0A%20%20%20%20%20%20updateFrameAttributes()%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20setWidth(%7B%20WIDTH%20%7D)%20%7B%0A%20%20%20%20%20%20width%20%3D%20Scratch.Cast.toNumber(WIDTH)%3B%0A%20%20%20%20%20%20updateFrameAttributes()%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20setHeight(%7B%20HEIGHT%20%7D)%20%7B%0A%20%20%20%20%20%20height%20%3D%20Scratch.Cast.toNumber(HEIGHT)%3B%0A%20%20%20%20%20%20updateFrameAttributes()%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20setInteractive(%7B%20INTERACTIVE%20%7D)%20%7B%0A%20%20%20%20%20%20interactive%20%3D%20Scratch.Cast.toBoolean(INTERACTIVE)%3B%0A%20%20%20%20%20%20updateFrameAttributes()%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20setResize(%7B%20RESIZE%20%7D)%20%7B%0A%20%20%20%20%20%20if%20(RESIZE%20%3D%3D%3D%20%22scale%22%20%7C%7C%20RESIZE%20%3D%3D%3D%20%22viewport%22)%20%7B%0A%20%20%20%20%20%20%20%20resizeBehavior%20%3D%20RESIZE%3B%0A%20%20%20%20%20%20%20%20if%20(overlay)%20%7B%0A%20%20%20%20%20%20%20%20%20%20overlay.mode%20%3D%20getOverlayMode()%3B%0A%20%20%20%20%20%20%20%20%20%20Scratch.renderer._updateOverlays()%3B%0A%20%20%20%20%20%20%20%20%20%20updateFrameAttributes()%3B%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%0A%20%20Scratch.extensions.register(new%20IframeExtension())%3B%0A%7D)(Scratch)%3B%0A%20%7D)(Scratch)%3B"]) {
+        vm.extensionManager.loadExtensionURL(extension);
+      }
+
+    } catch (e) {
+      handleError(e);
+    }
+  </script>
+  
+  
+    <script>
+      const getProjectData = (function() {
+        const storage = scaffolding.storage;
+        storage.onprogress = (total, loaded) => {
+          setProgress(interpolate(0.2, 0.98, loaded / total));
+        };
+        
+        storage.addWebStore(
+          [
+            storage.AssetType.ImageVector,
+            storage.AssetType.ImageBitmap,
+            storage.AssetType.Sound,
+            storage.AssetType.Font
+          ].filter(i => i),
+          (asset) => new URL('./assets/' + asset.assetId + '.' + asset.dataFormat, location).href
+        );
+        return () => new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = () => {
+          resolve(xhr.response);
+        };
+        xhr.onerror = () => {
+          if (location.protocol === 'file:') {
+            reject(new Error('Zip environment must be used from a website, not from a file URL.'));
+          } else {
+            reject(new Error('Request to load project data failed.'));
+          }
+        };
+        xhr.onprogress = (e) => {
+          if (e.lengthComputable) {
+            setProgress(interpolate(0.1, 0.2, e.loaded / e.total));
+          }
+        };
+        xhr.responseType = 'arraybuffer';
+        xhr.open('GET', "./assets/project.json");
+        xhr.send();
+      });
+      })();
+    </script>
+  <script>
+    const run = async () => {
+      const projectData = await getProjectData();
+      await scaffolding.loadProject(projectData);
+      setProgress(1);
+      loadingScreen.hidden = true;
+      if (true) {
+        scaffolding.start();
+      } else {
+        launchScreen.hidden = false;
+        launchScreen.addEventListener('click', () => {
+          launchScreen.hidden = true;
+          scaffolding.start();
+        });
+        launchScreen.focus();
+      }
+    };
+    run().catch(handleError);
+  </script>
+</body>
+</html>
